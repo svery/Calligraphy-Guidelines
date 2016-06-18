@@ -6,9 +6,14 @@ Guideline generator for calligraphy.
 - adjustable slant and slant frequency
 - adjustable line weight and style
 
+Update 06182016
 
-Todo (stuff people may want but I don't particularly care for):
+Added functionalities:
 
-- nib ladders
-- short ascenders / descenders
-- proper form (Google doc?)
+- Now supports different units (all units supported by LaTeX including mm, cm, in, pt)
+
+- Toggleable nib ladder for all lines or just one. 
+
+- Optional short ascenders and descenders (again, you can can change the [line type](https://en.wikibooks.org/wiki/LaTeX/PGF/TikZ#Line_pattern)).
+
+- Toggleable fill in line spacing
