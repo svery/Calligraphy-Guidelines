@@ -11,9 +11,6 @@ Update 06182016
 Added functionalities:
 
 - different units
-
 - nib ladder
-
 - Optional short ascenders and descenders
-
 - fill in line spacing
