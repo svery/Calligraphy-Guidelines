@@ -11,7 +11,6 @@
 \usepackage[top=1cm, bottom=1cm, left=1cm, right=1cm]{geometry}
 % change margins as you please
 
-
 %calculation and graphing packages
 \usepackage{calc, tikz, ifthen}
 \usepackage[nomessages]{fp}
@@ -20,33 +19,65 @@
 
 % input 
 % haven't figured out how to adapt to different units without having to change a bunch of places yet, sorry
-\def\pagewidth{195} % width of guidelines section in mms, no wider than the paper
-\def\pagelength{250} % length of guidelines section in mms, no longer than the paper
-\def\nibwidth{1.1mm} % nib width in mms, for pointed pen just enter x-height and fill in proportions below, or put 1mm in nibwidth and put the ascenders, etc in number of mms below
+\makeatletter
+\def\unit{mm} % unit for everything, supports mm, in, cm, pt, and probably other stuff
+\def\pagewidth{195} % width of guidelines section in unit, no wider than the paper
+\def\pagelength{250} % length of guidelines section in unit, no longer than the paper
+\def\nibwidthwithoutunit{2} % nib width in unit, for pointed pen just enter x-height and fill in proportions below, or put 1 in nibwidth and put the ascenders, etc in number of units below
+\def\nibwidth{\nibwidthwithoutunit \unit}
 \def\ascender{4} % ascender in nib widths
 \def\xheight{5} % x-height in nib widths
 \def\descender{4} % descender in nib widths
 \def\linespace{2} % space between lines in nib widths
 %
+% optional short ascender / descender
+\newboolean{ifshortascender}
+\setboolean{ifshortascender}{true} % change to false if not needed
+\def\shortascender{2}
+\newboolean{ifshortdescender}
+\setboolean{ifshortdescender}{true} % change to false if not needed
+\def\shortdescender{2}
+%
 % line weight, adjust for thicker / thinner lines
 \def\lineweight{0.2pt}
+%
+% fill line space, decide if you want the space between lines filled by a different colour
+\newboolean{iffill}
+\setboolean{iffill}{true} % change to false if not needed
+\definecolor{fillcolour}{RGB}{200,200,200} % enter color code
+%
+% nib ladder
+\newboolean{ifladder} % boolean for nib ladder
+\setboolean{ifladder}{true} % change to false if not needed
+\newboolean{ifladderall} % boolean for whether nib ladder is shown for all lines or just the first line
+\setboolean{ifladderall}{true} % change to false if you only want nib ladder for the first line
 %
 % slant
 \newboolean{ifslant}
 \setboolean{ifslant}{true} % change to false if not needed
 \def\slant{85} % slant from horizontal. eg. spencerian would be 52 and italics would be in the 80s
-\def\slantfreq{10} % length between each slant line in mms
+\def\slantfreq{10} % length between each slant line in unit (if you don't see slant lines it's probably because you used cm / in and didn't change this)
+\makeatother
 \begin{document}
 	% calculations, ignore--I just couldn't figure out how to do this within the \draw command
 	\FPeval{\ascx}{\ascender + \xheight}
 	\FPeval{\letterh}{\ascx+\descender}
 	\FPeval{\lineheight}{\letterh+\linespace}
+	\FPeval{\lines}{trunc(\pagelength/(\lineheight*\nibwidthwithoutunit):0)}
+	\FPeval{\actuallength}{\lines * \lineheight * \nibwidthwithoutunit}
 	%
-	% slant calculations, do not need if ifslant is set to false
+	% short ascender / descender calculations
+	\ifthenelse{\boolean{ifshortascender}}{
+		\FPeval{\shortasc}{\ascender - \shortascender}}{}
+	\ifthenelse{\boolean{ifshortdescender}}{
+		\FPeval{\shortdesc}{\ascx + \shortdescender}}{}
+	%
+	% slant calculations
 	\ifthenelse{\boolean{ifslant}}{
 		\FPeval{\slantradians}{(\FPpi*\slant) / \pagewidth}
 		\FPeval{\slantbegin}{\pagelength / tan \slantradians}
 		\FPeval{\slantend}{(\slantbegin+\pagelength) / \slantfreq}
+		\FPeval{\slantlength}{(\pagelength^2+\pagewidth^2)^(1/2)}
 		}{}
 	%
 	% gets rid of page numbering because I love everything else about the article class
@@ -58,28 +89,60 @@
 	% insert whatever title you want, or delete this line if you want a clean page of guidelines
 	%
 	% actual plotting
-	\begin{tikzpicture}[x=1mm, y=1mm]
+	\begin{tikzpicture}[x=1\unit, y=1\unit]
 	% clip to reduce mess
 	\coordinate (A) at (0, 0);
 	\coordinate (B) at (\pagewidth, 0);
-	\coordinate (C) at (0, -\pagelength);
-	\coordinate (D) at (\pagewidth, -\pagelength);
+	\coordinate (C) at (0, -\actuallength);
+	\coordinate (D) at (\pagewidth, -\actuallength);
 	\clip (A) -- (B) -- (D) -- (C) -- (A);
-	
-	% horizontal lines
-	\foreach \x in {0,...,100}{
-		\pgfmathsetmacro\result{-\x * \lineheight * \nibwidth}
-		\foreach \length in {0, \ascender, \ascx, \letterh, \lineheight}{
-			\draw [line width=\lineweight] ([yshift=\result] (0, -\length*\nibwidth ) -- +(\pagewidth, 0);
-			% can change line style by adding options such as [line width=\lineweight, dotted, red], etc (if you want different line settings for different lines just expand the for loop)
-		}
-	}
-	
+	%
 	% slant lines, will not show if ifslant is set to false
 	\ifthenelse{\boolean{ifslant}}{
 		\foreach \x in {0,...,\slantend}{
-			\pgfmathsetmacro\result{\x * \slantfreq mm}
-			\draw [line width=\lineweight] ([xshift=\result] (-\slantbegin, -\pagelength) -- +(\slant:400);}
+			\pgfmathsetmacro\slantshift{\x * \slantfreq \unit}
+			\draw [line width=\lineweight, xshift=\slantshift] (-\slantbegin, -\pagelength) -- +(\slant:\slantlength);}
+	}{}
+	%
+	% horizontal lines
+	\foreach \x in {0,...,\lines}{
+		\pgfmathsetmacro\result{-\x * \lineheight * \nibwidth}
+		\ifthenelse{\boolean{iffill}}{
+			\fill[fill=fillcolour, yshift=\result] (0,-\letterh*\nibwidth) rectangle (\pagewidth,-\lineheight*\nibwidth);
 		}{}
+		\foreach \length in {0, \ascender, \ascx, \letterh, \lineheight}{
+			\draw [line width=\lineweight, yshift=\result] (0, -\length*\nibwidth ) -- +(\pagewidth, 0);
+			% can change line style by adding options such as [line width=\lineweight, dotted, red], etc (if you want different line settings for different lines just expand the for loop)
+		}
+		%
+		% short ascenders and descenders, will not show if ifshortascender and ifshortdescender are set to false
+		\ifthenelse{\boolean{ifshortascender}}{
+			\draw [line width=\lineweight, dotted, yshift=\result] (0, -\shortasc*\nibwidth ) -- +(\pagewidth, 0);}{}
+		\ifthenelse{\boolean{ifshortdescender}}{
+			\draw [line width=\lineweight, dotted, yshift=\result] (0, -\shortdesc*\nibwidth ) -- +(\pagewidth, 0);}{}
+		% again, you can change the line format and colour
+		%
+		% nib ladder, will not show if ifladder is set to false
+		\ifthenelse{\boolean{ifladder}}{
+			\begin{scope}
+			\ifthenelse{\boolean{ifladderall}}{
+				\pgfmathsetmacro\laddershift{\result}
+				}
+				{\pgfmathsetmacro\laddershift{0}} 
+				% quite a bit of extra work for just one instance, but oh well, the compilation speed is still decent
+			\coordinate[yshift=\laddershift] (E) at (0, 0);
+			\coordinate[yshift=\laddershift] (F) at (2*\nibwidth, 0);
+			\coordinate[yshift=\laddershift] (G) at (2*\nibwidth, -\letterh * \nibwidth);
+			\coordinate[yshift=\laddershift] (H) at (0, -\letterh * \nibwidth);
+			\clip (E) -- (F) -- (G) -- (H) -- (E);
+			\foreach \len in {0, 2,...,\letterh}{
+				\pgfmathsetmacro\shift{\laddershift - \len*\nibwidth}
+				\draw[fill=black, yshift=\shift] (0,0) rectangle (\nibwidth,-\nibwidth);
+				\draw[fill=black, yshift=\shift] (\nibwidth,-\nibwidth) rectangle (2*\nibwidth,-2*\nibwidth);
+			}
+			\end{scope}
+		}{}
+		
+	}
 	\end{tikzpicture}
 \end{document}
