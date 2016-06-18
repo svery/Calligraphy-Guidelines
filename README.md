@@ -14,3 +14,4 @@ Added functionalities:
 - nib ladder
 - Optional short ascenders and descenders
 - fill in line spacing
+- fixed redundant information needed on page size
