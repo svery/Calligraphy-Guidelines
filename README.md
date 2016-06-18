@@ -10,10 +10,10 @@ Update 06182016
 
 Added functionalities:
 
-- Now supports different units (all units supported by LaTeX including mm, cm, in, pt)
+- different units
 
-- Toggleable nib ladder for all lines or just one. 
+- nib ladder
 
-- Optional short ascenders and descenders (again, you can can change the [line type](https://en.wikibooks.org/wiki/LaTeX/PGF/TikZ#Line_pattern)).
+- Optional short ascenders and descenders
 
-- Toggleable fill in line spacing
+- fill in line spacing
