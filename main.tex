@@ -2,6 +2,7 @@
 % Guideline generator for calligraphy
 % Original author: svery (reddit.com/u/svery)
 % License: CC BY-NC-SA 4.0 (http://creativecommons.org/licenses/by-nc-sa/4.0/)
+% To use on Overleaf: Click the Preview button to the right, download by clicking the PDF button on top
 %%%%%%%%%%%%%%%%%%%%
 
 % paper configurations
@@ -18,16 +19,13 @@
 
 
 % input 
-% haven't figured out how to adapt to different units without having to change a bunch of places yet, sorry
 \makeatletter
 \def\unit{mm} % unit for everything, supports mm, in, cm, pt, and probably other stuff
-\def\pagewidth{195} % width of guidelines section in unit, no wider than the paper
-\def\pagelength{250} % length of guidelines section in unit, no longer than the paper
 \def\nibwidthwithoutunit{2} % nib width in unit, for pointed pen just enter x-height and fill in proportions below, or put 1 in nibwidth and put the ascenders, etc in number of units below
 \def\nibwidth{\nibwidthwithoutunit \unit}
 \def\ascender{4} % ascender in nib widths
-\def\xheight{5} % x-height in nib widths
-\def\descender{4} % descender in nib widths
+\def\xheight{2.5} % x-height in nib widths
+\def\descender{3} % descender in nib widths
 \def\linespace{2} % space between lines in nib widths
 %
 % optional short ascender / descender
@@ -36,7 +34,7 @@
 \def\shortascender{2}
 \newboolean{ifshortdescender}
 \setboolean{ifshortdescender}{true} % change to false if not needed
-\def\shortdescender{2}
+\def\shortdescender{1}
 %
 % line weight, adjust for thicker / thinner lines
 \def\lineweight{0.2pt}
@@ -57,13 +55,21 @@
 \setboolean{ifslant}{true} % change to false if not needed
 \def\slant{85} % slant from horizontal. eg. spencerian would be 52 and italics would be in the 80s
 \def\slantfreq{10} % length between each slant line in unit (if you don't see slant lines it's probably because you used cm / in and didn't change this)
+%
+% converting units
+\def\convertunits#1#2{\strip@pt\dimexpr #2*65536/\number\dimexpr 1#1}
+\def\pagewidth{\convertunits{mm}{\textwidth}}
+\def\pagelength{\convertunits{mm}{\textheight}}
 \makeatother
 \begin{document}
 	% calculations, ignore--I just couldn't figure out how to do this within the \draw command
 	\FPeval{\ascx}{\ascender + \xheight}
 	\FPeval{\letterh}{\ascx+\descender}
 	\FPeval{\lineheight}{\letterh+\linespace}
-	\FPeval{\lines}{trunc(\pagelength/(\lineheight*\nibwidthwithoutunit):0)}
+	\FPeval{\lineheightinunits}{\lineheight * \nibwidthwithoutunit}
+	\FPadd{\pagewidth}{\pagewidth}{0}
+	\FPadd{\pagelength}{\pagelength}{0} % for some reason I need this or it says UPN stack empty
+	\FPeval{\lines}{trunc(\pagelength/ \lineheightinunits:0)}
 	\FPeval{\actuallength}{\lines * \lineheight * \nibwidthwithoutunit}
 	%
 	% short ascender / descender calculations
@@ -76,7 +82,7 @@
 	\ifthenelse{\boolean{ifslant}}{
 		\FPeval{\slantradians}{(\FPpi*\slant) / \pagewidth}
 		\FPeval{\slantbegin}{\pagelength / tan \slantradians}
-		\FPeval{\slantend}{(\slantbegin+\pagelength) / \slantfreq}
+		\FPeval{\slantend}{(\slantbegin+\pagewidth) / \slantfreq}
 		\FPeval{\slantlength}{(\pagelength^2+\pagewidth^2)^(1/2)}
 		}{}
 	%
@@ -85,7 +91,7 @@
 	\pagenumbering{gobble}
 	%
 	% title line
-	\centering Italic \ascender-\xheight-\descender, nib width \nibwidth \\
+	\centering Carolingian \ascender-\xheight-\descender, nib width \nibwidth \\
 	% insert whatever title you want, or delete this line if you want a clean page of guidelines
 	%
 	% actual plotting
