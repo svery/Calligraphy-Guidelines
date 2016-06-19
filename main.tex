@@ -1,3 +1,11 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% Welcome to Overleaf --- just edit your LaTeX on the left,
+% and we'll compile it for you on the right. If you give
+% someone the link to this page, they can edit at the same
+% time. See the help menu above for more info. Enjoy!
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%
 % Guideline generator for calligraphy
 % Original author: svery (reddit.com/u/svery)
@@ -60,6 +68,7 @@
 \def\convertunits#1#2{\strip@pt\dimexpr #2*65536/\number\dimexpr 1#1}
 \def\pagewidth{\convertunits{mm}{\textwidth}}
 \def\pagelength{\convertunits{mm}{\textheight}}
+\def\titleheight{\convertunits{mm}{\baselineskip}}
 \makeatother
 \begin{document}
 	% calculations, ignore--I just couldn't figure out how to do this within the \draw command
@@ -67,8 +76,9 @@
 	\FPeval{\letterh}{\ascx+\descender}
 	\FPeval{\lineheight}{\letterh+\linespace}
 	\FPeval{\lineheightinunits}{\lineheight * \nibwidthwithoutunit}
-	\FPadd{\pagewidth}{\pagewidth}{0}
-	\FPadd{\pagelength}{\pagelength}{0} % for some reason I need this or it says UPN stack empty
+	\FPadd{\pagewidth}{\pagewidth}{0} % for some reason I need this or it says UPN stack empty
+	\FPsub{\pagelength}{\pagelength}{\titleheight} % need to subtract height of title
+	% change \titleheight if you're using a larger title
 	\FPeval{\lines}{trunc(\pagelength/ \lineheightinunits:0)}
 	\FPeval{\actuallength}{\lines * \lineheight * \nibwidthwithoutunit}
 	%
@@ -84,7 +94,7 @@
 		\FPeval{\slantbegin}{\pagelength / tan \slantradians}
 		\FPeval{\slantend}{(\slantbegin+\pagewidth) / \slantfreq}
 		\FPeval{\slantlength}{(\pagelength^2+\pagewidth^2)^(1/2)}
-		}{}
+	}{}
 	%
 	% gets rid of page numbering because I love everything else about the article class
 	% if you want the page number, just delete this line or change 'gobble' to 'arabic', 'roman', etc
@@ -133,9 +143,9 @@
 			\begin{scope}
 			\ifthenelse{\boolean{ifladderall}}{
 				\pgfmathsetmacro\laddershift{\result}
-				}
-				{\pgfmathsetmacro\laddershift{0}} 
-				% quite a bit of extra work for just one instance, but oh well, the compilation speed is still decent
+			}
+			{\pgfmathsetmacro\laddershift{0}} 
+			% quite a bit of extra work for just one instance, but oh well, the compilation speed is still decent
 			\coordinate[yshift=\laddershift] (E) at (0, 0);
 			\coordinate[yshift=\laddershift] (F) at (2*\nibwidth, 0);
 			\coordinate[yshift=\laddershift] (G) at (2*\nibwidth, -\letterh * \nibwidth);
