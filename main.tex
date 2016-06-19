@@ -3,6 +3,7 @@
 % Original author: svery (reddit.com/u/svery)
 % License: CC BY-NC-SA 4.0 (http://creativecommons.org/licenses/by-nc-sa/4.0/)
 % To use on Overleaf: Click the Preview button to the right, download by clicking the PDF button on top
+% /u/DibujEx is working on a tutorial
 %%%%%%%%%%%%%%%%%%%%
 
 % paper configurations
@@ -58,11 +59,10 @@
 %
 % Default horizontal lines (the ones between ascender, x-height, descender, and line space)
 \def\lineweight{0.2pt} % line weight, adjust for thicker / thinner lines
-\def\linepattern{solid} % options: solid, dashed, dotted, dashdotted, densely dotted, loosely dotted, double, or you can even write something like
-% dash pattern=on 3mm off 1mm on 2mm off 0.5mm 
-% to make your own pattern
+\def\linepattern{solid} % options: solid, dashed, dotted, dashdotted, densely dotted, loosely dotted, double
+% custom also possible https://en.wikibooks.org/wiki/LaTeX/PGF/TikZ#Line_pattern
 \definecolor{linecolour}{RGB}{0,0,0} % enter colour code for the lines
-% you can always expand the loop below to get different settings for each line.
+% you can always expand the loop below to get different settings for each line
 %
 % cosmetics for slant, see above for explanation
 \def\slantweight{0.2pt}
@@ -120,7 +120,7 @@
 	%
 	% title line
 	\centering \scriptname\space \ascender-\xheight-\descender, nib width \nibwidth \\
-	% insert whatever title you want, or delete this line if you want a clean page of guidelines
+	% Delete or modify as you wish
 	%
 	% actual plotting
 	\begin{tikzpicture}[x=1\unit, y=1\unit]
@@ -142,7 +142,7 @@
 	\foreach \x in {0,...,\lines}{
 		\pgfmathsetmacro\result{-\x * \lineheight * \nibwidth}
 		\ifthenelse{\boolean{iffill}}{
-			\fill[fill=fillcolour, yshift=\result] (0,-\letterh*\nibwidth) rectangle (\pagewidth,-\lineheight*\nibwidth);
+			\fill[fill=fillcolour,  yshift=\result] (0,-\letterh*\nibwidth) rectangle (\pagewidth,-\lineheight*\nibwidth);
 		}{}
 		\foreach \length in {0, \ascender, \ascx, \letterh, \lineheight}{
 			\draw [line width=\lineweight, \linepattern, draw=linecolour, yshift=\result] (0, -\length*\nibwidth ) -- +(\pagewidth, 0);
