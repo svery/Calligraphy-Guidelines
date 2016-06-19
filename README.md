@@ -16,3 +16,4 @@ Added functionalities:
 - fill in line spacing
 - fixed redundant information needed on page size
 - fixed issue with title height
+- added more straightforward customization
