@@ -1,11 +1,3 @@
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%
-% Welcome to Overleaf --- just edit your LaTeX on the left,
-% and we'll compile it for you on the right. If you give
-% someone the link to this page, they can edit at the same
-% time. See the help menu above for more info. Enjoy!
-%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%
 % Guideline generator for calligraphy
 % Original author: svery (reddit.com/u/svery)
@@ -17,8 +9,10 @@
 \documentclass[letterpaper]{article}
 % change to a4paper for a4 paper, etc
 % add landscape (say \documentclass[letterpaper, landscape]{article}) for landscape orientation
+% if you want other paper size, delete the letterpaper option and go to the next line
 \usepackage[top=1cm, bottom=1cm, left=1cm, right=1cm]{geometry}
 % change margins as you please
+% can put for example, paperheight=8.5in,paperwidth=5.5in to get folded letter paper, or other paper sizes
 
 %calculation and graphing packages
 \usepackage{calc, tikz, ifthen}
@@ -35,6 +29,20 @@
 \def\xheight{2.5} % x-height in nib widths
 \def\descender{3} % descender in nib widths
 \def\linespace{2} % space between lines in nib widths
+% cosmetics for the default horizontal lines
+\def\lineweight{0.2pt} % line weight, adjust for thicker / thinner lines
+\def\linepattern{solid} % options: solid, dashed, dotted, dashdottted, densely dotted, loosely dotted, double, or you can even write something like
+% dash pattern=on 3mm off 1mm on 2mm off 0.5mm 
+% to make your own pattern
+\definecolor{linecolour}{RGB}{0,0,0} % enter colour code for the lines
+% you can always expand the loop to get different settings for each line--for example
+%    \foreach \thing in {\something, \someotherthing}{
+%        \draw[pattern] (0, \thing)--(1, \thing)
+%    }
+% can be changed to 
+%    \draw[pattern] (0, \something)--(1, \something)
+%    \draw[pattern] (0, \someotherthing)--(1, \someotherthing)
+% and now you can put different patterns for each line.
 %
 % optional short ascender / descender
 \newboolean{ifshortascender}
@@ -43,20 +51,22 @@
 \newboolean{ifshortdescender}
 \setboolean{ifshortdescender}{true} % change to false if not needed
 \def\shortdescender{1}
-%
-% line weight, adjust for thicker / thinner lines
-\def\lineweight{0.2pt}
+% cosmetics for the short ascenders and descenders line, see above for explanation
+\def\shortlinesweight{0.1pt}
+\def\shortlinespattern{dotted} 
+\definecolor{shortlinescolour}{RGB}{0,0,0}
 %
 % fill line space, decide if you want the space between lines filled by a different colour
 \newboolean{iffill}
 \setboolean{iffill}{true} % change to false if not needed
-\definecolor{fillcolour}{RGB}{200,200,200} % enter color code
+\definecolor{fillcolour}{RGB}{200,200,200} % enter colour code
 %
 % nib ladder
 \newboolean{ifladder} % boolean for nib ladder
 \setboolean{ifladder}{true} % change to false if not needed
 \newboolean{ifladderall} % boolean for whether nib ladder is shown for all lines or just the first line
 \setboolean{ifladderall}{true} % change to false if you only want nib ladder for the first line
+\definecolor{laddercolour}{RGB}{0,0,0} % enter colour code for colour of the nib ladder
 %
 % slant
 \newboolean{ifslant}
@@ -127,15 +137,15 @@
 			\fill[fill=fillcolour, yshift=\result] (0,-\letterh*\nibwidth) rectangle (\pagewidth,-\lineheight*\nibwidth);
 		}{}
 		\foreach \length in {0, \ascender, \ascx, \letterh, \lineheight}{
-			\draw [line width=\lineweight, yshift=\result] (0, -\length*\nibwidth ) -- +(\pagewidth, 0);
-			% can change line style by adding options such as [line width=\lineweight, dotted, red], etc (if you want different line settings for different lines just expand the for loop)
+			\draw [line width=\lineweight, draw=linecolour, yshift=\result] (0, -\length*\nibwidth ) -- +(\pagewidth, 0);
+			% if you want different line settings for different lines just expand the foreach loop
 		}
 		%
 		% short ascenders and descenders, will not show if ifshortascender and ifshortdescender are set to false
 		\ifthenelse{\boolean{ifshortascender}}{
-			\draw [line width=\lineweight, dotted, yshift=\result] (0, -\shortasc*\nibwidth ) -- +(\pagewidth, 0);}{}
+			\draw [line width=\shortlinesweight, \shortlinespattern, draw=shortlinescolour, yshift=\result] (0, -\shortasc*\nibwidth ) -- +(\pagewidth, 0);}{}
 		\ifthenelse{\boolean{ifshortdescender}}{
-			\draw [line width=\lineweight, dotted, yshift=\result] (0, -\shortdesc*\nibwidth ) -- +(\pagewidth, 0);}{}
+			\draw [line width=\shortlinesweight, \shortlinespattern, draw=shortlinescolour, yshift=\result] (0, -\shortdesc*\nibwidth ) -- +(\pagewidth, 0);}{}
 		% again, you can change the line format and colour
 		%
 		% nib ladder, will not show if ifladder is set to false
@@ -145,7 +155,8 @@
 				\pgfmathsetmacro\laddershift{\result}
 			}
 			{\pgfmathsetmacro\laddershift{0}} 
-			% quite a bit of extra work for just one instance, but oh well, the compilation speed is still decent
+			% quite a bit of extra work when it's just one instance, but oh well, the compilation speed is still decent
+			% please don't judge
 			\coordinate[yshift=\laddershift] (E) at (0, 0);
 			\coordinate[yshift=\laddershift] (F) at (2*\nibwidth, 0);
 			\coordinate[yshift=\laddershift] (G) at (2*\nibwidth, -\letterh * \nibwidth);
@@ -153,8 +164,8 @@
 			\clip (E) -- (F) -- (G) -- (H) -- (E);
 			\foreach \len in {0, 2,...,\letterh}{
 				\pgfmathsetmacro\shift{\laddershift - \len*\nibwidth}
-				\draw[fill=black, yshift=\shift] (0,0) rectangle (\nibwidth,-\nibwidth);
-				\draw[fill=black, yshift=\shift] (\nibwidth,-\nibwidth) rectangle (2*\nibwidth,-2*\nibwidth);
+				\draw[draw=none, fill=laddercolour, yshift=\shift] (0,0) rectangle (\nibwidth,-\nibwidth);
+				\draw[draw=none, fill=laddercolour, yshift=\shift] (\nibwidth,-\nibwidth) rectangle (2*\nibwidth,-2*\nibwidth);
 			}
 			\end{scope}
 		}{}
