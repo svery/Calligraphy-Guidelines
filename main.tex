@@ -18,10 +18,12 @@
 \usepackage{calc, tikz, ifthen}
 \usepackage[nomessages]{fp}
 \usetikzlibrary{calc, intersections}
-
-
-% input 
+%
+%
+% Basic input 
+%
 \makeatletter
+\def\scriptname{Carolingian} % just used for the title which you can get rid of
 \def\unit{mm} % unit for everything, supports mm, in, cm, pt, and probably other stuff
 \def\nibwidthwithoutunit{2} % nib width in unit, for pointed pen just enter x-height and fill in proportions below, or put 1 in nibwidth and put the ascenders, etc in number of units below
 \def\nibwidth{\nibwidthwithoutunit \unit}
@@ -29,20 +31,14 @@
 \def\xheight{2.5} % x-height in nib widths
 \def\descender{3} % descender in nib widths
 \def\linespace{2} % space between lines in nib widths
-% cosmetics for the default horizontal lines
-\def\lineweight{0.2pt} % line weight, adjust for thicker / thinner lines
-\def\linepattern{solid} % options: solid, dashed, dotted, dashdotted, densely dotted, loosely dotted, double, or you can even write something like
-% dash pattern=on 3mm off 1mm on 2mm off 0.5mm 
-% to make your own pattern
-\definecolor{linecolour}{RGB}{0,0,0} % enter colour code for the lines
-% you can always expand the loop to get different settings for each line--for example
-%    \foreach \thing in {\something, \someotherthing}{
-%        \draw[pattern] (0, \thing)--(1, \thing)
-%    }
-% can be changed to 
-%    \draw[pattern] (0, \something)--(1, \something)
-%    \draw[pattern] (0, \someotherthing)--(1, \someotherthing)
-% and now you can put different patterns for each line.
+% slant
+\newboolean{ifslant}
+\setboolean{ifslant}{true} % change to false if not needed
+\def\slant{85} % slant from horizontal. eg. spencerian would be 52 and italics would be in the 80s
+\def\slantfreq{10} % length between each slant line in unit (if you don't see slant lines it's probably because you used cm / in and didn't change this)
+%
+%
+% Advanced options
 %
 % optional short ascender / descender
 \newboolean{ifshortascender}
@@ -51,9 +47,31 @@
 \newboolean{ifshortdescender}
 \setboolean{ifshortdescender}{true} % change to false if not needed
 \def\shortdescender{1}
-% cosmetics for the short ascenders and descenders line, see above for explanation
+% nib ladder
+\newboolean{ifladder} % boolean for nib ladder
+\setboolean{ifladder}{true} % change to false if not needed
+\newboolean{ifladderall} % boolean for whether nib ladder is shown for all lines or just the first line
+\setboolean{ifladderall}{true} % change to false if you only want nib ladder for the first line
+%
+%
+% Cosmetics
+%
+% Default horizontal lines (the ones between ascender, x-height, descender, and line space)
+\def\lineweight{0.2pt} % line weight, adjust for thicker / thinner lines
+\def\linepattern{solid} % options: solid, dashed, dotted, dashdotted, densely dotted, loosely dotted, double, or you can even write something like
+% dash pattern=on 3mm off 1mm on 2mm off 0.5mm 
+% to make your own pattern
+\definecolor{linecolour}{RGB}{0,0,0} % enter colour code for the lines
+% you can always expand the loop below to get different settings for each line.
+%
+% cosmetics for slant, see above for explanation
+\def\slantweight{0.2pt}
+\def\slantpattern{solid}
+\definecolor{slantcolour}{RGB}{0,0,0}
+%
+% cosmetics for the short ascenders and descenders line
 \def\shortlinesweight{0.1pt}
-\def\shortlinespattern{dotted} 
+\def\shortlinespattern{dotted}
 \definecolor{shortlinescolour}{RGB}{0,0,0}
 %
 % fill line space, decide if you want the space between lines filled by a different colour
@@ -61,24 +79,15 @@
 \setboolean{iffill}{true} % change to false if not needed
 \definecolor{fillcolour}{RGB}{200,200,200} % enter colour code
 %
-% nib ladder
-\newboolean{ifladder} % boolean for nib ladder
-\setboolean{ifladder}{true} % change to false if not needed
-\newboolean{ifladderall} % boolean for whether nib ladder is shown for all lines or just the first line
-\setboolean{ifladderall}{true} % change to false if you only want nib ladder for the first line
+% cosmetics for nib ladder
 \definecolor{laddercolour}{RGB}{0,0,0} % enter colour code for colour of the nib ladder
 %
-% slant
-\newboolean{ifslant}
-\setboolean{ifslant}{true} % change to false if not needed
-\def\slant{85} % slant from horizontal. eg. spencerian would be 52 and italics would be in the 80s
-\def\slantfreq{10} % length between each slant line in unit (if you don't see slant lines it's probably because you used cm / in and didn't change this)
 %
-% converting units
+% converting units, ignore
 \def\convertunits#1#2{\strip@pt\dimexpr #2*65536/\number\dimexpr 1#1}
-\def\pagewidth{\convertunits{mm}{\textwidth}}
-\def\pagelength{\convertunits{mm}{\textheight}}
-\def\titleheight{\convertunits{mm}{\baselineskip}}
+\def\pagewidth{\convertunits{\unit}{\textwidth}}
+\def\pagelength{\convertunits{\unit}{\textheight}}
+\def\titleheight{\convertunits{\unit}{\baselineskip}}
 \makeatother
 \begin{document}
 	% calculations, ignore--I just couldn't figure out how to do this within the \draw command
@@ -107,11 +116,10 @@
 	}{}
 	%
 	% gets rid of page numbering because I love everything else about the article class
-	% if you want the page number, just delete this line or change 'gobble' to 'arabic', 'roman', etc
-	\pagenumbering{gobble}
+	\pagenumbering{arabic}
 	%
 	% title line
-	\centering Carolingian \ascender-\xheight-\descender, nib width \nibwidth \\
+	\centering \scriptname\space \ascender-\xheight-\descender, nib width \nibwidth \\
 	% insert whatever title you want, or delete this line if you want a clean page of guidelines
 	%
 	% actual plotting
@@ -127,7 +135,7 @@
 	\ifthenelse{\boolean{ifslant}}{
 		\foreach \x in {0,...,\slantend}{
 			\pgfmathsetmacro\slantshift{\x * \slantfreq \unit}
-			\draw [line width=\lineweight, xshift=\slantshift] (-\slantbegin, -\pagelength) -- +(\slant:\slantlength);}
+			\draw [line width=\slantweight, \slantpattern, draw=slantcolour, xshift=\slantshift] (-\slantbegin, -\pagelength) -- +(\slant:\slantlength);}
 	}{}
 	%
 	% horizontal lines
@@ -137,8 +145,16 @@
 			\fill[fill=fillcolour, yshift=\result] (0,-\letterh*\nibwidth) rectangle (\pagewidth,-\lineheight*\nibwidth);
 		}{}
 		\foreach \length in {0, \ascender, \ascx, \letterh, \lineheight}{
-			\draw [line width=\lineweight, draw=linecolour, yshift=\result] (0, -\length*\nibwidth ) -- +(\pagewidth, 0);
+			\draw [line width=\lineweight, \linepattern, draw=linecolour, yshift=\result] (0, -\length*\nibwidth ) -- +(\pagewidth, 0);
 			% if you want different line settings for different lines just expand the foreach loop
+			% if you're reading through this you probably don't need instructions but just in case:
+			%    \foreach \thing in {\something, \someotherthing}{
+			%        \draw[pattern] (0, \thing)--(1, \thing)
+			%    }
+			% can be changed to 
+			%    \draw[pattern] (0, \something)--(1, \something)
+			%    \draw[pattern] (0, \someotherthing)--(1, \someotherthing)
+			% and now you can put different patterns for each line.
 		}
 		%
 		% short ascenders and descenders, will not show if ifshortascender and ifshortdescender are set to false
@@ -146,7 +162,6 @@
 			\draw [line width=\shortlinesweight, \shortlinespattern, draw=shortlinescolour, yshift=\result] (0, -\shortasc*\nibwidth ) -- +(\pagewidth, 0);}{}
 		\ifthenelse{\boolean{ifshortdescender}}{
 			\draw [line width=\shortlinesweight, \shortlinespattern, draw=shortlinescolour, yshift=\result] (0, -\shortdesc*\nibwidth ) -- +(\pagewidth, 0);}{}
-		% again, you can change the line format and colour
 		%
 		% nib ladder, will not show if ifladder is set to false
 		\ifthenelse{\boolean{ifladder}}{
