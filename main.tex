@@ -147,14 +147,6 @@
 		\foreach \length in {0, \ascender, \ascx, \letterh, \lineheight}{
 			\draw [line width=\lineweight, \linepattern, draw=linecolour, yshift=\result] (0, -\length*\nibwidth ) -- +(\pagewidth, 0);
 			% if you want different line settings for different lines just expand the foreach loop
-			% if you're reading through this you probably don't need instructions but just in case:
-			%    \foreach \thing in {\something, \someotherthing}{
-			%        \draw[pattern] (0, \thing)--(1, \thing)
-			%    }
-			% can be changed to 
-			%    \draw[pattern] (0, \something)--(1, \something)
-			%    \draw[pattern] (0, \someotherthing)--(1, \someotherthing)
-			% and now you can put different patterns for each line.
 		}
 		%
 		% short ascenders and descenders, will not show if ifshortascender and ifshortdescender are set to false
