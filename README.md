@@ -15,3 +15,4 @@ Added functionalities:
 - Optional short ascenders and descenders
 - fill in line spacing
 - fixed redundant information needed on page size
+- fixed issue with title height
