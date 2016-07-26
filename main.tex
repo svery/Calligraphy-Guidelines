@@ -87,7 +87,7 @@
 \def\convertunits#1#2{\strip@pt\dimexpr #2*65536/\number\dimexpr 1#1}
 \def\pagewidth{\convertunits{\unit}{\textwidth}}
 \def\pagelength{\convertunits{\unit}{\textheight}}
-\def\titleheight{\convertunits{\unit}{\baselineskip}}
+\def\titleheight{\convertunits{\unit}{\baselineskip+5pt}}
 \makeatother
 \begin{document}
 	% calculations, ignore--I just couldn't figure out how to do this within the \draw command
