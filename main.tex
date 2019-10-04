@@ -112,7 +112,7 @@
 		\FPeval{\slantradians}{(\FPpi*\slant) / \pagewidth}
 		\FPeval{\slantbegin}{\pagelength / tan \slantradians}
 		\FPeval{\slantend}{(\slantbegin+\pagewidth) / \slantfreq}
-		\FPeval{\slantlength}{(\pagelength^2+\pagewidth^2)^(1/2)}
+		\FPeval{\slantlength}{((\slantbegin+\pagelength)^2+\pagewidth^2)^(1/2)}
 	}{}
 	%
 	% gets rid of page numbering because I love everything else about the article class
